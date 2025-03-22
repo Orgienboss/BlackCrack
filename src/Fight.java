@@ -23,8 +23,7 @@ public class Fight {
                 System.out.println("Invalid input. Try again.");
             }
         }
-        System.out.println(input);
-        if (input == "y") {
+        if (input.equals("y")) {
             return true;
         } else {
             return false;
