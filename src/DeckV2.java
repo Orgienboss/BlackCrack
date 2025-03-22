@@ -1,20 +1,16 @@
-import java.util.*;
-
 public class DeckV2 {
     Card[] deck;
     int decksize;
-    int cardcount;
     int minValue;
     int maxValue;
     boolean images;
 
-    public DeckV2(int cardCount, int minValue, int maxValue, boolean images) {
-        this.cardcount = cardCount;
+    public DeckV2(int minValue, int maxValue, boolean images) {
         this.minValue = minValue;
         this.maxValue = maxValue;
-        this.decksize = (maxValue - minValue + 1) * cardCount;
+        this.decksize = (maxValue - minValue + 1) * 4;
         if (images) {
-            this.decksize = decksize + 3 * cardCount;
+            this.decksize = decksize + 3 * 4;
         }
         this.images = images;
     }
@@ -30,9 +26,12 @@ public class DeckV2 {
     public void genDeck() {
         System.out.println("Size: " + this.decksize);
         this.deck = new Card[this.decksize];
-        int val = 1;
+        int val = this.minValue;
         char rank = 'N';
         int count = 0;
+        int count2 = 0;
+        String s = null;
+
         for (int i = 0; i < deck.length; i++) {
             switch (count) {
                 case 0:
@@ -59,13 +58,37 @@ public class DeckV2 {
                     break;
             }
 
-            this.deck[i] = new Card(String.valueOf(val), val, rank);
+            if (val > this.maxValue) {
+                if (count2 == 0) {
+                    s = "King";
+                } else if (count2 == 4) {
+                    s = "Queen";
+                } else if (count2 == 4 * 2) {
+                    s = "Jack";
+                }
+                this.deck[i] = new Card(s, maxValue, rank);
+                count2 = count2 + 1;
+            } else {
+                this.deck[i] = new Card(String.valueOf(val), val, rank);
+            }
+
             if (count == 0) {
                 val = val + 1;
             }
 
-            // KÖNIG DAME UN BUBE MACHEN
-
         }
     }
+
+    // Durchmischung des Decks bzw Arrays (ggf. mehrmals)
+    public void shuffleDeck(int factor) {
+        for (int j = 0; j < factor; j++) {
+            for (int i = 0; i < deck.length; i++) {
+                int m = (int) (Math.random() * (this.deck.length));
+                Card temp = this.deck[m];
+                this.deck[m] = this.deck[i];
+                this.deck[i] = temp;
+            }
+        }
+    }
+
 }

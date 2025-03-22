@@ -10,6 +10,14 @@ public class Card {
     }
 
     public void printCard() {
-        System.out.println(name + " of " + rank);
+        System.out.println(name + " of " + rank + "\t Value: " + this.value);
+    }
+
+    public void printCardShort() {
+        System.out.println(rank + " " + name);
+    }
+
+    public int getValue() {
+        return this.value;
     }
 }
