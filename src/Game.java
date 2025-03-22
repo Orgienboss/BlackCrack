@@ -5,9 +5,10 @@ public class Game {
     private Dungeon dungeon;
     private Scanner scanner;
 
-    public Game() {
-        this.player = new Player("Held", 100);
-        this.dungeon = new Dungeon();
-        this.scanner = new Scanner(System.in);
-    }
+    // public Game() {
+    // this.player = new Player("Held", 100);
+    // this.dungeon = new Dungeon();
+    // this.scanner = new Scanner(System.in);
+    // }
+
 }
