@@ -39,12 +39,16 @@ public class Fight {
         player.setPoints(0);
         player.getDeck().genDeck();
         player.getDeck().shuffleDeck(4);
+        Card drawn;
 
         do {
-            Card drawn = draw(playerdeck);
+            do {
+                drawn = draw(playerdeck);
+            } while (drawn.isDrawn());
+            drawn.setDrawn();
             input = "";
             System.out.println("Card drawn: " + drawn.getValue());
-            player.addPoints(drawn.getValue());
+            drawn.action(player);
             System.out.println("Points: " + player.getPoints());
             turn = turn + 1;
             if (player.getPoints() == player.getGauge() || player.getPoints() > player.getGauge()) {
@@ -52,14 +56,12 @@ public class Fight {
             }
         } while (yesNoScan());
 
-        // WARUM AKZEPTIERT ER JA NICHT
-
         if (player.getPoints() < player.getGauge()) {
             System.out.println("Final score: " + player.getPoints());
         } else if (player.getPoints() > player.getGauge()) {
             System.out.println("extended gauge, you lose");
         } else if (player.getPoints() == player.getGauge()) {
-            System.out.println("21! Critical Hit");
+            System.out.println(player.getGauge() + "! Critical Hit");
         }
     }
 
