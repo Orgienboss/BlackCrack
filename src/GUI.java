@@ -26,16 +26,15 @@ public class GUI {
         Component filler = Box.createRigidArea(new Dimension(0, 0));
         panel.add(filler, constraints);
       }
-  }
+    }
 
-        
     constraints.weightx = 0;
     constraints.weighty = 0;
     constraints.fill = GridBagConstraints.NONE;
     constraints.anchor = GridBagConstraints.NORTHWEST;
 
     JLabel label_0 = new JLabel("Score");
-    constraints.gridx = -9;
+    constraints.gridx = -5;
     constraints.gridy = 0;
     constraints.gridwidth = 2;
     constraints.gridheight = 2;

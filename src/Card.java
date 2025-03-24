@@ -30,6 +30,11 @@ public class Card {
         System.out.println(rank + " " + name);
     }
 
+    public String toStringShort() {
+        String s = rank + " " + name;
+        return s;
+    }
+
     public int getValue() {
         return this.value;
     }

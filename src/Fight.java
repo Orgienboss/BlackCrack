@@ -1,12 +1,13 @@
 import java.util.*;
 
-public class Fight {
+public class Fight extends Game {
     Player player;
     DeckV2 playerdeck;
     DeckV2 enemy;
     int turn = 0;
     Scanner scanner = new Scanner(System.in);
     String input = "";
+    Gui1 g = new Gui1("Game");
 
     public Fight(Player player) {// , DeckV2 enemy) {
         this.player = player;
@@ -40,6 +41,7 @@ public class Fight {
         player.getDeck().genDeck();
         player.getDeck().shuffleDeck(4);
         Card drawn;
+        g.setGauge(String.valueOf(player.getGauge()));
 
         do {
             do {
@@ -48,8 +50,10 @@ public class Fight {
             drawn.setDrawn();
             input = "";
             System.out.println("Card drawn: " + drawn.getValue());
+            g.setCarddrawn(drawn.toStringShort());
             drawn.action(player);
             System.out.println("Points: " + player.getPoints());
+            g.setScore(String.valueOf(player.getPoints()));
             turn = turn + 1;
             if (player.getPoints() == player.getGauge() || player.getPoints() > player.getGauge()) {
                 break;
@@ -64,5 +68,32 @@ public class Fight {
             System.out.println(player.getGauge() + "! Critical Hit");
         }
     }
+
+    // public void hit() {
+    // Card drawn;
+
+    // do {
+    // drawn = draw(playerdeck);
+    // } while (drawn.isDrawn());
+    // drawn.setDrawn();
+    // input = "";
+    // System.out.println("Card drawn: " + drawn.getValue());
+    // g.setCarddrawn(drawn.toStringShort());
+    // drawn.action(player);
+    // System.out.println("Points: " + player.getPoints());
+    // g.setScore(String.valueOf(player.getPoints()));
+    // turn = turn + 1;
+
+    // if (player.getPoints() > player.getGauge()) {
+    // System.out.println("extended gauge, you lose");
+    // } else if (player.getPoints() == player.getGauge()) {
+    // System.out.println(player.getGauge() + "! Critical Hit");
+    // }
+
+    // }
+
+    // public void stay() {
+    // System.out.println("Final score: " + player.getPoints());
+    // }
 
 }

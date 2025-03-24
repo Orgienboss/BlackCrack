@@ -1,14 +1,18 @@
 import java.util.Scanner;
 
 public class Game {
-    private Player player;
-    private Dungeon dungeon;
-    private Scanner scanner;
+    Player player;
+    Dungeon dungeon;
+    Scanner scanner;
 
-    // public Game() {
-    // this.player = new Player("Held", 100);
-    // this.dungeon = new Dungeon();
-    // this.scanner = new Scanner(System.in);
+    public void start() {
+        Player p = new Player("Maxy", 100, new DeckV2(1, 2, false));
+        Fight f = new Fight(p);
+        f.battle();
+    }
+
+    // public Gui1 getGui() {
+    // return g;
     // }
 
 }
