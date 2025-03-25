@@ -21,10 +21,16 @@ public class Gui1 extends JFrame {
     private Button button1 = new Button();
     private Button button2 = new Button();
     private Label label4 = new Label();
+    private Label label5 = new Label();
+    private Label label6 = new Label();
+
+    Player p;
+    // Fight f = new Fight("Game", p);
     // Ende Attribute
 
-    public Gui1(String title) {
+    public Gui1(String title, Player player) {
         super(title);
+        this.p = player;
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         int frameWidth = 900;
         int frameHeight = 700;
@@ -52,11 +58,11 @@ public class Gui1 extends JFrame {
         panel2.setBackground(new Color(167, 138, 127));
         cp.add(panel2);
 
-        label2.setBounds(64, 440, 110, 20);
+        label2.setBounds(90, 420, 110, 20);
         label2.setText("Gauge: ");
         cp.add(label2);
 
-        label3.setBounds(232, 160, 110, 28);
+        label3.setBounds(240, 160, 110, 20);
         label3.setText("Score: ");
         cp.add(label3);
 
@@ -76,12 +82,24 @@ public class Gui1 extends JFrame {
                 button2_ActionPerformed(evt);
             }
         });
-
         cp.add(button2);
-        label4.setBounds(232, 232, 110, 20);
+
+        label4.setBounds(240, 180, 170, 20);
         label4.setText("Card drawn: ");
         cp.add(label4);
-        // Ende Komponenten
+
+        label5.setBounds(240, 195, 200, 40);
+        label5.setText("");
+        label5.setVisible(false);
+        label5.setFont(new Font("Distant Galaxy", Font.ITALIC, 20));
+        cp.add(label5);
+
+        label6.setBounds(256, 70, 407, 52);
+        label6.setFont(new Font("Distant Galaxy", Font.CENTER_BASELINE, 20));
+        label6.setText("Round 1");
+        label6.setAlignment(1);
+        cp.add(label6);
+
         setResizable(false);
         setVisible(true);
     }
@@ -109,9 +127,31 @@ public class Gui1 extends JFrame {
         // TODO hier Quelltext einfügen
     }
 
+    public void overShot() {
+        label5.setText("OVERSHOT");
+        label5.setVisible(true);
+        button1.setEnabled(false);
+        button2.setEnabled(false);
+    }
+
+    public void setFinal() {
+        label5.setText("FINAL");
+        label5.setVisible(true);
+        button1.setEnabled(false);
+        button2.setEnabled(false);
+    }
+
+    public void roundReset() {
+        label6.setText("Round 1");
+        label5.setVisible(false);
+        button1.setEnabled(true);
+        button2.setEnabled(true);
+    }
+
+    public void setRound(int r) {
+        label6.setText("Round " + r);
+    }
+
     // Ende Methoden
 
-    public static void main(String[] args) {
-        new Gui1("Gui1");
-    }
 }

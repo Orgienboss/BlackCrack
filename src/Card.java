@@ -42,4 +42,8 @@ public class Card {
     public void action(Player player) {
         player.addPoints(value);
     }
+
+    public void action(Player player, int factor) {
+        player.addPoints(value * factor);
+    }
 }

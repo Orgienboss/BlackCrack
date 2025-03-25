@@ -23,6 +23,22 @@ public class DeckV2 {
         return this.deck[pos];
     }
 
+    public int getMinVal() {
+        return this.minValue;
+    }
+
+    public int getMaxVal() {
+        return this.maxValue;
+    }
+
+    public int getMaxPossible() {
+        int a = 0;
+        for (int i = 0; i < deck.length; i++) {
+            a = a + deck[i].getValue();
+        }
+        return a;
+    }
+
     public void genDeck() {
         System.out.println("Size: " + this.decksize);
         this.deck = new Card[this.decksize];

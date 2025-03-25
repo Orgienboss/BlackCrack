@@ -4,10 +4,12 @@ public class Game {
     Player player;
     Dungeon dungeon;
     Scanner scanner;
+    Fight f;
 
     public void start() {
-        Player p = new Player("Maxy", 100, new DeckV2(1, 2, false));
-        Fight f = new Fight(p);
+        Player p = new Player("Maxy", 100, new DeckV2(1, 10, true));
+        this.player = p;
+        f = new Fight("Game", p);
         f.battle();
     }
 
