@@ -10,12 +10,15 @@ public class Fight extends Gui1 {
 
     // p p;
     DeckV2 pdeck = p.getDeck();
-    DeckV2 enemy;
+    DeckV2 eDeck;
     int turn = 0;
     Scanner scanner = new Scanner(System.in);
     String input = "";
     boolean overShotplayer = false, overShotenemy = false;
     boolean finalsetplayer = false, finalsetenemy = false;
+    Player enemy;
+    Random random = new Random();
+
     // Gui1 g = new Gui1("Game", p);
 
     // public Fight(p p) {// , DeckV2 enemy) {
@@ -42,26 +45,28 @@ public class Fight extends Gui1 {
     }
 
     public Player genEnemy(int factor) {
-        Player e; // Gauge
+        Player e;
         int rHp = (int) Math.random() * 100 * factor + 10;
-        int b;
-
-        int min = (int) Math.random() * 20 - 10;
+        int min = random.nextInt(1, 20);
+        System.out.println("E min: " + min);
+        // int max;
         int max = (int) Math.random() * 35 + min * 2;
-        int img = (int) Math.random();
+        System.out.println("E max: " + max);
+
+        int img = random.nextInt(0, 10);
         boolean img2;
-        if (img > 0.5) {
+        if (img > 5) {
             img2 = false;
         } else {
             img2 = true;
         }
 
         DeckV2 eDeck = new DeckV2(min, max, img2);
+        eDeck.genDeck();
+
         e = new Player("Enemy", rHp, eDeck);
-        do {
-            b = (int) Math.random();
-        } while (b < 1 && b >= 0.1);
-        e.setGauge(e.getDeck().getMaxVal() * b);
+
+        e.setGauge((e.getDeck().getMaxVal() + e.getDeck().getMinVal() * 11));
         return e;
     }
 
@@ -70,6 +75,14 @@ public class Fight extends Gui1 {
     }
 
     public void battle() {
+        this.enemy = genEnemy((int) Math.random() * 3 + 1);
+        this.enemy.getDeck().genDeck();
+        System.out.println(enemy.getGauge());
+        // this.enemy.getDeck().shuffleDeck(4);
+        for (int i = 0; i < enemy.getDeck().getCardDeck().length; i++) {
+            enemy.getDeck().getCard(i).printCardShort();
+        }
+
         p.setPoints(0);
         p.getDeck().genDeck();
         p.getDeck().shuffleDeck(4);
@@ -108,49 +121,59 @@ public class Fight extends Gui1 {
         }
     }
 
-    public void button1_ActionPerformed(ActionEvent evt) {
-        hit();
+    public void buttonHit_ActionPerformed(ActionEvent evt) {
+        hit(p);
     }
 
-    public void button2_ActionPerformed(ActionEvent evt) {
-        stay();
+    public void buttonStay_ActionPerformed(ActionEvent evt) {
+        stay(p);
     }
 
-    public void hit() {
+    public void hit(Player play) {
         Card drawn;
 
-        if (!finalsetplayer && !overShotplayer) {
+        if (!play.isFinalset() && !play.isFinalset()) {
             do {
-                drawn = draw(pdeck);
+                drawn = draw(play.getDeck());
             } while (drawn.isDrawn());
             drawn.setDrawn();
-            input = "";
-            System.out.println("Card drawn: " + drawn.getValue());
             setCarddrawn(drawn.toStringShort());
-            if (drawn.getValue() == p.getDeck().getMinVal() && p.getPoints() + drawn.getValue() * 11 <= p.getGauge()) {
-                drawn.action(p, 11);
+            if (drawn.getValue() == play.getDeck().getMinVal()
+                    && play.getPoints() + drawn.getValue() * 11 <= play.getGauge()) {
+                drawn.action(play, 11);
             } else {
-                drawn.action(p);
+                drawn.action(play);
             }
-            System.out.println("Points: " + p.getPoints());
-            setScore(String.valueOf(p.getPoints()));
+            System.out.println("Points: " + play.getPoints());
+            setScore(String.valueOf(play.getPoints()));
             turn = turn + 1;
         }
 
-        if (p.getPoints() > p.getGauge()) {
+        if (p.getPoints() > play.getGauge()) {
             overShot();
-        } else if (p.getPoints() == p.getGauge()) {
+        } else if (play.getPoints() == play.getGauge()) {
             setFinal();
         }
-        // enemy actions
+        // enemyTurn();
         setRound(turn);
     }
 
-    public void stay() {
-        System.out.println("Final score: " + p.getPoints());
+    public void stay(Player play) {
+        System.out.println("Final score: " + play.getPoints());
         setFinal();
-        // enemy actions
-        setRound(turn);
+        do {
+            // enemyTurn();
+            setRound(turn);
+        } while (!enemy.isFinalset() && !enemy.isOvershot());
+
+    }
+
+    public void enemyTurn() {
+        if (enemy.getPoints() < enemy.getGauge() - (4 * enemy.getDeck().getMinVal())) {
+            hit(enemy);
+        } else {
+            stay(enemy);
+        }
     }
 
 }

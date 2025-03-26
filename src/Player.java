@@ -6,11 +6,21 @@ public class Player {
     int points;
     int gauge = 21;
     DeckV2 deck;
+    boolean finalset = false;
+    boolean overShot = false;
 
     public Player(String name, int hp, DeckV2 deck) {
         this.name = name;
         this.hp = hp;
         this.deck = deck;
+    }
+
+    public boolean isFinalset() {
+        return this.finalset;
+    }
+
+    public boolean isOvershot() {
+        return this.overShot;
     }
 
     public int getPoints() {

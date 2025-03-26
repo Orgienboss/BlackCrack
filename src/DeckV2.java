@@ -15,6 +15,10 @@ public class DeckV2 {
         this.images = images;
     }
 
+    public Card[] getCardDeck() {
+        return deck;
+    }
+
     public int getSize() {
         return this.decksize;
     }
