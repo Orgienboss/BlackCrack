@@ -27,6 +27,12 @@ public class DeckV2 {
         return this.deck[pos];
     }
 
+    public void printDeck() {
+        for (int i = 0; i < deck.length; i++) {
+            deck[i].printCardShort();
+        }
+    }
+
     public int getMinVal() {
         return this.minValue;
     }
@@ -44,7 +50,7 @@ public class DeckV2 {
     }
 
     public void genDeck() {
-        System.out.println("Size: " + this.decksize);
+        // System.out.println("Size: " + this.decksize);
         this.deck = new Card[this.decksize];
         int val = this.minValue;
         char rank = 'N';

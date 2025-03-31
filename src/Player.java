@@ -1,18 +1,54 @@
 public class Player {
+    boolean isPlayer;
     String name;
     int hp;
     // int posX; Falls noch Dungeoncrawler kommt
     // int posY;
-    int points;
+    int points = 0;
     int gauge = 21;
     DeckV2 deck;
     boolean finalset = false;
     boolean overShot = false;
 
-    public Player(String name, int hp, DeckV2 deck) {
+    public Player(String name, boolean isPlayer, int hp, DeckV2 deck) {
+        this.isPlayer = isPlayer;
         this.name = name;
         this.hp = hp;
         this.deck = deck;
+    }
+
+    public void setHP(int h) {
+        this.hp = h;
+    }
+
+    public void damage(int h) {
+        this.hp = this.hp - h;
+    }
+
+    public void setNewRound() {
+        this.finalset = false;
+        this.overShot = false;
+        this.points = 0;
+    }
+
+    public boolean isPlayer() {
+        return this.isPlayer;
+    }
+
+    public boolean isLockedIn() {
+        if (this.finalset || this.overShot) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void setFinalset(boolean b) {
+        this.finalset = b;
+    }
+
+    public void setOvershot(boolean b) {
+        this.overShot = b;
     }
 
     public boolean isFinalset() {
@@ -51,27 +87,4 @@ public class Player {
         this.gauge = i;
     }
 
-    public Player genEnemy(int factor) {
-        Player e; // Gauge
-        int rHp = (int) Math.random() * 100 * factor + 10;
-        int b;
-
-        int min = (int) Math.random() * 20 - 10;
-        int max = (int) Math.random() * 35 + min * 2;
-        int img = (int) Math.random();
-        boolean img2;
-        if (img > 0.5) {
-            img2 = false;
-        } else {
-            img2 = true;
-        }
-
-        DeckV2 eDeck = new DeckV2(min, max, img2);
-        e = new Player("Enemy", rHp, eDeck);
-        do {
-            b = (int) Math.random();
-        } while (b < 1 && b >= 0.1);
-        e.setGauge(e.getDeck().getMaxVal() * b);
-        return e;
-    }
 }
