@@ -9,12 +9,44 @@ public class Player {
     DeckV2 deck;
     boolean finalset = false;
     boolean overShot = false;
+    int maxHP;
+    boolean hasShield = false;
+    boolean doubleDamage = false;
 
     public Player(String name, boolean isPlayer, int hp, DeckV2 deck) {
         this.isPlayer = isPlayer;
         this.name = name;
         this.hp = hp;
+        this.maxHP = hp;
         this.deck = deck;
+    }
+
+    public boolean getDoubledamage() {
+        return this.doubleDamage;
+    }
+
+    public boolean getShied() {
+        return this.hasShield;
+    }
+
+    public void setDoubledamage(boolean b) {
+        this.doubleDamage = true;
+    }
+
+    public void setShield(boolean b) {
+        this.hasShield = b;
+    }
+
+    public void flipShield() {
+        if (this.hasShield) {
+            this.hasShield = false;
+        } else {
+            this.hasShield = true;
+        }
+    }
+
+    public int getMaxHP() {
+        return this.maxHP;
     }
 
     public void setHP(int h) {
@@ -22,7 +54,11 @@ public class Player {
     }
 
     public void damage(int h) {
-        this.hp = this.hp - h;
+        if (hasShield) {
+            return;
+        } else {
+            this.hp -= h;
+        }
     }
 
     public void setNewRound() {

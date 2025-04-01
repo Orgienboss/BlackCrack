@@ -3,6 +3,9 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
+import java.util.Random;
+import java.util.random.*;
+
 /**
  *
  * description
@@ -11,7 +14,7 @@ import javax.swing.event.*;
  * @author
  */
 
-public class Gui1 extends JFrame {
+public abstract class Gui1 extends JFrame {
     // Anfang Attribute
     private Label labelTitle = new Label();
     private Panel panelPlayerPH = new Panel(null);
@@ -33,11 +36,27 @@ public class Gui1 extends JFrame {
     private Panel panelPlayerHp = new Panel();
     private Panel panelEnemyHp = new Panel();
     private ImageIcon playerHearts = new ImageIcon("./lib/hearts.png");
+    private ImageIcon playerIcon = new ImageIcon("./lib/player.png");
     private Panel panelPlayerHpBox = new Panel();
     private Panel panelEnemyHpBox = new Panel();
+    private Panel panelGameOver = new Panel();
+    private Button buttonRestart = new Button("Restart");
+    private Label labelEnemySlain = new Label("Enemys slain: ");
+    private Label labelGameOver = new Label("Game Over");
+    private ImageIcon enemyIcon1 = new ImageIcon("./lib/enemy1.png");
+    private ImageIcon enemyIcon2 = new ImageIcon("./lib/enemy2.png");
+    private ImageIcon[] enemyIconArray = { enemyIcon1, enemyIcon2 };
 
+    protected Panel panelAbilityCard = new Panel();
+    protected Label labelAbilityText = new Label();
+    protected Button buttonUseAbility = new Button("Use Ability");
+    protected boolean abilityAvailable = false;
+    protected int abilityCooldown = 0;
+
+    Random random = new Random();
     boolean damageDealt;
     Player p;
+    Container cp;
     // Fight f = new Fight("Game", p);
     // Ende Attribute
 
@@ -52,11 +71,36 @@ public class Gui1 extends JFrame {
         int x = (d.width - getSize().width) / 2;
         int y = (d.height - getSize().height) / 2;
         setLocation(x, y);
-        Container cp = getContentPane();
+        cp = getContentPane();
         cp.setLayout(null);
         cp.setBackground(new Color(231, 215, 193));
 
         // Anfang Komponenten
+        buttonRestart.setBounds(370, 320, 160, 60);
+        buttonRestart.setVisible(false);
+        buttonRestart.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                buttonRestart_ActionPerformed(evt);
+            }
+        });
+        cp.add(buttonRestart);
+
+        labelEnemySlain.setBounds(370, 280, 160, 60);
+        labelEnemySlain.setAlignment(1);
+        labelEnemySlain.setVisible(false);
+        cp.add(labelEnemySlain);
+
+        labelGameOver.setBounds(0, 30, frameWidth, 60);
+        labelGameOver.setAlignment(1);
+        labelGameOver.setFont(new Font("Distant Galaxy", Font.BOLD, 65));
+        labelGameOver.setVisible(false);
+        cp.add(labelGameOver);
+
+        panelGameOver.setBounds(0, 0, frameWidth, frameHeight);
+        panelGameOver.setBackground(new Color(231, 215, 193));
+        panelGameOver.setVisible(false);
+        cp.add(panelGameOver);
+
         labelTitle.setBounds(256, 24, 407, 52);
         labelTitle.setText("BLACKDUNGEON");
         labelTitle.setAlignment(Label.CENTER);
@@ -75,10 +119,16 @@ public class Gui1 extends JFrame {
 
         panelPlayerPH.setBounds(25, 152, 190, 270);
         panelPlayerPH.setBackground(new Color(167, 138, 127));
+        JLabel temp0 = new JLabel(playerIcon);
+        temp0.setSize(190, 270);
+        panelPlayerPH.add(temp0);
         cp.add(panelPlayerPH);
 
         panelEnemyPH.setBounds(670, 152, 190, 270);
         panelEnemyPH.setBackground(new Color(167, 138, 127));
+        JLabel temp3 = new JLabel(enemyIconArray[random.nextInt(0, (enemyIconArray.length))]);
+        temp3.setSize(190, 270);
+        panelEnemyPH.add(temp3);
         cp.add(panelEnemyPH);
 
         labelGauge.setBounds(25, 420, 190, 20);
@@ -175,9 +225,58 @@ public class Gui1 extends JFrame {
         panelEnemyHp.add(temp2);
         cp.add(panelEnemyHp);
 
+        panelAbilityCard.setBounds(300, 500, 300, 80);
+        panelAbilityCard.setBackground(new Color(200, 200, 200));
+        panelAbilityCard.setLayout(null);
+        panelAbilityCard.setVisible(false);
+        cp.add(panelAbilityCard);
+
+        // Ability Text Label
+        labelAbilityText.setBounds(10, 10, 280, 30);
+        labelAbilityText.setAlignment(Label.CENTER);
+        panelAbilityCard.add(labelAbilityText);
+
+        // Use Ability Button
+        buttonUseAbility.setBounds(100, 50, 100, 25);
+        buttonUseAbility.setEnabled(false);
+        buttonUseAbility.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent evt) {
+                useAbility();
+            }
+        });
+        panelAbilityCard.add(buttonUseAbility);
+
         setResizable(false);
         setVisible(true);
 
+    }
+
+    public void useAbility() {
+
+    }
+
+    // public void specialCardGen() {
+    // Panel panelSCback = new Panel();
+    // Panel panelSCfront = new Panel();
+    // Label labelSCexplain = new Label();
+    // Button buttonSCuse = new Button();
+
+    // panelSCback.setBounds(50, 720, 40, 80);
+    // panelSCback.setBackground(Color.BLACK);
+
+    // panelSCfront.setBounds(55, 725, 30, 70);
+    // panelSCfront.setBackground(Color.WHITE);
+    // cp.add(panelSCback);
+    // }
+
+    public void newEnemyImage() {
+        JLabel temp3 = new JLabel(enemyIconArray[random.nextInt(0, (enemyIconArray.length))]);
+        temp3.setSize(190, 270);
+        panelEnemyPH.add(temp3);
+    }
+
+    public void close() {
+        super.hide();
     }
 
     public void setScore(Player play, String s) {
@@ -201,6 +300,21 @@ public class Gui1 extends JFrame {
         buttonContinue.setVisible(true);
     }
 
+    public void gameOver(boolean b) {
+        panelGameOver.setVisible(b);
+        labelEnemySlain.setVisible(b);
+        labelGameOver.setVisible(b);
+        buttonRestart.setVisible(b);
+    }
+
+    public void gameOver(boolean b, int a) {
+        panelGameOver.setVisible(b);
+        labelEnemySlain.setText("Enemys slain: " + a);
+        labelEnemySlain.setVisible(b);
+        labelGameOver.setVisible(b);
+        buttonRestart.setVisible(b);
+    }
+
     public void setCarddrawn(Player play, String s) {
         if (play.isPlayer) {
             labelCarddrawn.setText("Card drawn: " + s);
@@ -214,12 +328,12 @@ public class Gui1 extends JFrame {
         if (play.isPlayer) {
             labelHPplayer.setText("HP: " + (int) b);
             double a = 100 - b;
-            double x = panelPlayerHp.getX() - (a / play.getHp()) * 90 + panelPlayerHp.getWidth();
+            double x = panelPlayerHp.getX() - (a / play.getMaxHP()) * 90 + panelPlayerHp.getWidth();
             int w = panelPlayerHpBox.getWidth();
             panelPlayerHpBox.setBounds((int) x, 120, (int) (w + a), 40);
         } else {
             labelHPenemy.setText("HP: " + (int) b);
-            double w = panelEnemyHp.getWidth() * (b / play.getHp());
+            double w = panelEnemyHp.getWidth() * (b / play.getMaxHP());
             w = 90 - w;
             panelEnemyHpBox.setBounds(panelEnemyHpBox.getX(), 120, (int) w, 40);
         }
@@ -248,12 +362,14 @@ public class Gui1 extends JFrame {
     public void buttonContinue_ActionPerformed(ActionEvent evt) {
     }
 
+    public void buttonRestart_ActionPerformed(ActionEvent evt) {
+
+    }
+
     public void overShot(Player play) {
         if (play.isPlayer) {
             labelState.setText("OVERSHOT");
-            labelState.setVisible(true);
-            buttonHit.setEnabled(false);
-            buttonStay.setEnabled(false);
+            lockIn();
         } else {
             labelStateEnemy.setText("OVERSHOT");
             labelStateEnemy.setVisible(true);
@@ -261,13 +377,17 @@ public class Gui1 extends JFrame {
 
     }
 
+    public void lockIn() {
+        labelState.setVisible(true);
+        buttonHit.setEnabled(false);
+        buttonStay.setEnabled(false);
+        buttonUseAbility.setEnabled(false);
+    }
+
     public void setFinal(Player play) {
         if (play.isPlayer) {
             labelState.setText("FINAL");
-            labelState.setVisible(true);
-            buttonHit.setEnabled(false);
-            buttonStay.setEnabled(false);
-
+            lockIn();
         } else {
             labelStateEnemy.setText("FINAL");
             labelStateEnemy.setVisible(true);
@@ -282,6 +402,7 @@ public class Gui1 extends JFrame {
         buttonHit.setEnabled(true);
         buttonStay.setEnabled(true);
         buttonContinue.setVisible(false);
+        buttonUseAbility.setEnabled(true);
     }
 
     public void setRound(int r) {

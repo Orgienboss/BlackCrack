@@ -19,6 +19,7 @@ public class Fight extends Gui1 {
     Player enemy;
     Random random = new Random();
     int carddrawer = 0;
+    int enemysslain = 0;
 
     // Gui1 g = new Gui1("Game", p);
 
@@ -48,10 +49,8 @@ public class Fight extends Gui1 {
         Player e;
         int rHp = (int) (Math.random() * 100 * factor) + 10;
         int min = random.nextInt(1, 3);
-        System.out.println(min);
         // int max;
         int max = (int) (Math.random() * 25 + (min * 4));
-        System.out.println(max);
 
         int img = random.nextInt(0, 10);
         boolean img2;
@@ -67,16 +66,16 @@ public class Fight extends Gui1 {
         e = new Player("Enemy", false, rHp, eDeck);
 
         e.setGauge((e.getDeck().getMaxVal() + (e.getDeck().getMinVal() * 11)));
-        System.out.println("e.Gauge: " + e.getGauge());
         return e;
     }
 
     public Card draw(DeckV2 deck) {
-        Card drawn = deck.getCard(carddrawer);
-        carddrawer = carddrawer + 1;
-        if (drawn == null || carddrawer == deck.getSize()) {
+        Card drawn = deck.getCard(deck.getIndex());
+        deck.addIndex(1);
+        if (deck.getIndex() == deck.getSize()) {
             deck.genDeck();
             deck.shuffleDeck(4);
+            deck.setIndex(0);
             drawn = draw(deck);
         }
         return drawn;
@@ -87,17 +86,17 @@ public class Fight extends Gui1 {
         if (turn == 0) {
             this.enemy = genEnemy(1);
         }
-        if (this.enemy.getHp() <= 0 || this.enemy == null) {
+        if (!(this.enemy.getHp() > 0)) {
             this.enemy = genEnemy((int) Math.random() * 3 + 1);
+            newEnemyImage();
+            enemysslain += 1;
         }
 
+        generateAbilityCard();
         damageDealt = false;
         setGauge(enemy, String.valueOf(enemy.getGauge()));
         this.enemy.getDeck().genDeck();
-        this.enemy.getDeck().printDeck();
-        System.out.println("---------------");
         this.enemy.getDeck().shuffleDeck(4);
-        this.enemy.getDeck().printDeck();
         this.enemy.setNewRound();
         setScore(enemy, "");
         setHearts(p, p.getHp());
@@ -113,12 +112,75 @@ public class Fight extends Gui1 {
         // hit(enemy);
     }
 
+    public void generateAbilityCard() {
+        if (abilityCooldown > 0) {
+            abilityCooldown--;
+            panelAbilityCard.setVisible(false);
+            abilityAvailable = false;
+            return;
+        }
+
+        String[] abilities = {
+                "Double Damage",
+                "Heal HP",
+                "Shield Next Attack",
+                null // Represents no ability appearing
+        };
+
+        String selectedAbility = abilities[random.nextInt(abilities.length)];
+
+        if (selectedAbility == null) {
+            panelAbilityCard.setVisible(false);
+            abilityAvailable = false;
+        } else {
+            labelAbilityText.setText(selectedAbility);
+            panelAbilityCard.setVisible(true);
+            buttonUseAbility.setEnabled(true);
+            abilityAvailable = true;
+        }
+    }
+
+    public void useAbility() {
+        if (!abilityAvailable)
+            return;
+
+        String ability = labelAbilityText.getText();
+
+        switch (ability) {
+            case "Double Damage":
+                p.setDoubledamage(true);
+                break;
+            case "Heal HP":
+                p.damage(-(random.nextInt(5, 30)));
+                setHearts(p, p.getHp()); // Update UI
+                break;
+            case "Shield Next Attack":
+                p.setShield(true);
+                break;
+        }
+
+        abilityCooldown = 8; // Cooldown for 3 turns
+        panelAbilityCard.setVisible(false);
+        abilityAvailable = false;
+    }
+
     public void buttonHit_ActionPerformed(ActionEvent evt) {
+        generateAbilityCard();
         hit(p);
     }
 
     public void buttonStay_ActionPerformed(ActionEvent evt) {
         stay(p);
+    }
+
+    public void exit() {
+        System.exit(0);
+    }
+
+    public void buttonRestart_ActionPerformed(ActionEvent evt) {
+        Fight f = new Fight("Game", new Player("Hero", p.isPlayer(), p.getMaxHP(), new DeckV2(1, 10, true)));
+        close();
+        f.battle();
     }
 
     public void hit(Player play) {
@@ -153,6 +215,9 @@ public class Fight extends Gui1 {
         // Handle Perfect Hand (Instant Lock-In)
         else if (play.getPoints() == play.getGauge()) {
             setFinal(play);
+            if (!play.isPlayer()) {
+                p.setFinalset(true);
+            }
             damageDeal();
         }
 
@@ -281,29 +346,37 @@ public class Fight extends Gui1 {
 
         // Handle overshot cases first
         if (p.isOvershot()) {
-            int damage = enemy.getPoints() / 2; // Enemy wins by default, deals damage
+            int damage = enemy.getPoints(); // Enemy wins by default, deals damage
             p.damage(damage);
             System.out.println("Player busted! Took " + damage + " damage.");
-            roundEnd();
+            checkHp();
             return;
         } else if (enemy.isOvershot()) {
-            int damage = p.getPoints() / 2; // Player wins by default, deals damage
+            int damage = p.getPoints(); // Player wins by default, deals damage
+            if (p.getDoubledamage()) {
+                damage *= 2;
+                p.setDoubledamage(false);
+            }
             enemy.damage(damage);
             System.out.println("Enemy busted! Took " + damage + " damage.");
-            roundEnd();
+            checkHp();
             return;
         }
 
         // Calculate damage based on percentage difference
-        double scoreDiff = Math.abs(playerScoreP - enemyScoreP);
+        double scoreDiff = Math.abs(playerScoreP - enemyScoreP) * 2;
         if (scoreDiff < 0) {
             scoreDiff = scoreDiff * -2;
         }
-        int baseDamage = (int) (scoreDiff * 10); // Convert percentage to damage
+        int baseDamage = (int) (scoreDiff * 10) + 3; // Convert percentage to damage
+        if (p.getDoubledamage()) {
+            baseDamage *= 2;
+            p.setDoubledamage(false);
+        }
 
         // Apply a bonus multiplier for near-perfect hands
         if (scoreDiff > 0.9)
-            baseDamage *= 2;
+            baseDamage *= 4;
 
         // Determine who takes damage
         if (enemyScoreP >= playerScoreP) {
@@ -314,9 +387,14 @@ public class Fight extends Gui1 {
             System.out.println("Player wins the round! Enemy takes " + baseDamage + " damage.");
         }
 
-        // End the round if the player is still alive
+        checkHp();
+    }
+
+    public void checkHp() {
         if (p.getHp() > 0) {
             roundEnd();
+        } else {
+            gameOver(true, enemysslain);
         }
     }
     // double playerScoreP = (double) p.getPoints() / p.getGauge();

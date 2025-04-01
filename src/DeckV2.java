@@ -4,6 +4,7 @@ public class DeckV2 {
     int minValue;
     int maxValue;
     boolean images;
+    int index = 0;
 
     public DeckV2(int minValue, int maxValue, boolean images) {
         this.minValue = minValue;
@@ -13,6 +14,18 @@ public class DeckV2 {
             this.decksize = decksize + 3 * 4;
         }
         this.images = images;
+    }
+
+    public int getIndex() {
+        return this.index;
+    }
+
+    public void addIndex(int a) {
+        this.index += a;
+    }
+
+    public void setIndex(int a) {
+        this.index = a;
     }
 
     public Card[] getCardDeck() {
