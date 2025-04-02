@@ -3,444 +3,334 @@ import java.util.*;
 
 public class Fight extends Gui1 {
 
+    // Konstruktor
     public Fight(String title, Player p) {
         super(title, p);
-        // TODO Auto-generated constructor stub
     }
 
-    // p p;
-    DeckV2 pdeck = p.getDeck();
-    DeckV2 eDeck;
-    int turn = 0;
+    // Instanzvariablen
+    DeckV2 pdeck = p.getDeck(); // Deck des Spielers
+    DeckV2 eDeck; // Deck des Gegners
+    int turn = 0; // Aktuelle Runde
     Scanner scanner = new Scanner(System.in);
     String input = "";
     boolean overShotplayer = false, overShotenemy = false;
     boolean finalsetplayer = false, finalsetenemy = false;
-    Player enemy;
-    Random random = new Random();
+    Player enemy; // Gegner-Player
+    Random random = new Random(); // Zufallsgenerator für zufällige Aktionen
     int carddrawer = 0;
-    int enemysslain = 0;
+    int enemysslain = 0; // Anzahl der besiegten Gegner
 
-    // Gui1 g = new Gui1("Game", p);
-
-    // public Fight(p p) {// , DeckV2 enemy) {
-    // this.p = p;
-    // this.pdeck = p.getDeck();
-    // this.enemy = enemy;
-    // }
-
-    // public boolean yesNoScan() {
-    // while (!input.equals("y") && !input.equals("n")) {
-    // System.out.print("Draw again? 'y' or 'n': ");
-    // input = scanner.nextLine().trim().toLowerCase();
-
-    // if (!input.equals("y") && !input.equals("n")) {
-    // }
-    // }
-    // if (input.equals("y")) {
-    // return true;
-    // } else {
-    // return false;
-    // }
-
-    // }
-
+    // Generiert einen neuen Gegner mit zufälligen Werten
     public Player genEnemy(int factor) {
         Player e;
-        int rHp = (int) (Math.random() * 100 * factor) + 10;
-        int min = random.nextInt(1, 3);
-        // int max;
-        int max = (int) (Math.random() * 25 + (min * 4));
+        int rHp = (int) (Math.random() * 100 * factor) + 10; // Zufällige HP
+        int min = random.nextInt(1, 3); // Zufälliger Minimalwert für das Deck
+        int max = (int) (Math.random() * 25 + (min * 4)); // Zufälliger Maximalwert für das Deck
 
-        int img = random.nextInt(0, 10);
-        boolean img2;
-        if (img > 5) {
-            img2 = false;
-        } else {
-            img2 = true;
-        }
+        boolean img2 = random.nextInt(0, 10) <= 5; // Zufällige Bildwahl für den Gegner
+        eDeck = new DeckV2(min, max, img2); // Erstellen des Decks des Gegners
+        eDeck.genDeck(); // Deck des Gegners generieren
 
-        DeckV2 eDeck = new DeckV2(min, max, img2);
-        eDeck.genDeck();
+        e = new Player("Enemy", false, rHp, eDeck); // Neuer Gegner-Player
 
-        e = new Player("Enemy", false, rHp, eDeck);
-
+        // Setzt die Anzeigeleiste des Gegners
         e.setGauge((e.getDeck().getMaxVal() + (e.getDeck().getMinVal() * 11)));
         return e;
     }
 
+    // Zieht eine Karte aus einem Deck
     public Card draw(DeckV2 deck) {
         Card drawn = deck.getCard(deck.getIndex());
-        deck.addIndex(1);
+
+        deck.addIndex(1); // Erhöht den Index, um die nächste Karte zu ziehen
         if (deck.getIndex() == deck.getSize()) {
-            deck.genDeck();
-            deck.shuffleDeck(4);
-            deck.setIndex(0);
-            drawn = draw(deck);
+            deck.genDeck(); // Deck neu generieren
+            deck.shuffleDeck(4); // Deck mischen
+            deck.setIndex(0); // Zurück zum ersten Index
+            drawn = draw(deck); // Rekursive Ziehung einer neuen Karte
         }
         return drawn;
     }
 
+    // Der Hauptkampfmechanismus
     public void battle() {
 
         if (turn == 0) {
-            this.enemy = genEnemy(1);
+            this.enemy = genEnemy(1); // Wenn es die erste Runde ist, generiere einen Gegner
         }
         if (!(this.enemy.getHp() > 0)) {
-            this.enemy = genEnemy((int) Math.random() * 3 + 1);
+            this.enemy = genEnemy((int) Math.random() * 3 + 1); // Gegner neu generieren, wenn er besiegt wurde
             newEnemyImage();
-            enemysslain += 1;
+            enemysslain += 1; // Zähle die besiegten Gegner
         }
 
+        // Generiere eine Fähigkeitskarte
         generateAbilityCard();
-        damageDealt = false;
-        setGauge(enemy, String.valueOf(enemy.getGauge()));
+        damageDealt = false; // Rücksetzen des Schadens
+        setGauge(enemy, String.valueOf(enemy.getGauge())); // Setze die Anzeigeleiste des Gegners
         this.enemy.getDeck().genDeck();
         this.enemy.getDeck().shuffleDeck(4);
-        this.enemy.setNewRound();
+        this.enemy.setNewRound(); // Starte eine neue Runde für den Gegner
         setScore(enemy, "");
-        setHearts(p, p.getHp());
-        setHearts(enemy, enemy.getHp());
-        p.setNewRound();
+        setHearts(p, p.getHp()); // Setze die Lebensanzeige des Spielers
+        setHearts(enemy, enemy.getHp()); // Setze die Lebensanzeige des Gegners
+        p.setNewRound(); // Starte eine neue Runde für den Spieler
         setScore(p, "");
-        p.getDeck().genDeck();
+        p.getDeck().genDeck(); // Deck des Spielers neu generieren
         p.getDeck().shuffleDeck(4);
 
-        setGauge(p, String.valueOf(p.getGauge()));
+        setGauge(p, String.valueOf(p.getGauge())); // Setze die Anzeigeleiste des Spielers
 
-        hit(p);
-        // hit(enemy);
+        hit(p); // Spieler führt seinen Zug aus
     }
 
+    // Generiert eine Fähigkeitskarte für den Spieler
     public void generateAbilityCard() {
         if (abilityCooldown > 0) {
-            abilityCooldown--;
-            panelAbilityCard.setVisible(false);
+            abilityCooldown--; // Verringere den Cooldown
+            panelAbilityCard.setVisible(false); // Verberge die Fähigkeitskarte
             abilityAvailable = false;
             return;
         }
 
         String[] abilities = {
-                "Double Damage",
-                "Heal HP",
-                "Shield Next Attack",
-                null // Represents no ability appearing
+                "Double damage", // Doppelschaden
+                "Heal HP", // Heile HP
+                "Shield next attack", // Schutz für den nächsten Angriff
+                null // Keine Fähigkeit wird angezeigt
         };
 
+        // Wähle zufällig eine Fähigkeit aus
         String selectedAbility = abilities[random.nextInt(abilities.length)];
 
         if (selectedAbility == null) {
-            panelAbilityCard.setVisible(false);
+            panelAbilityCard.setVisible(false); // Verberge die Karte, wenn keine Fähigkeit ausgewählt wurde
             abilityAvailable = false;
         } else {
-            labelAbilityText.setText(selectedAbility);
-            panelAbilityCard.setVisible(true);
-            buttonUseAbility.setEnabled(true);
+            labelAbilityText.setText(selectedAbility); // Setze die Fähigkeitsbeschreibung
+            panelAbilityCard.setVisible(true); // Zeige die Fähigkeitskarte
+            buttonUseAbility.setEnabled(true); // Ermögliche die Benutzung der Fähigkeit
             abilityAvailable = true;
         }
     }
 
+    // Wende die ausgewählte Fähigkeit an
+    @Override
     public void useAbility() {
         if (!abilityAvailable)
-            return;
+            return; // Wenn keine Fähigkeit verfügbar ist, tue nichts
 
         String ability = labelAbilityText.getText();
 
+        // Je nach gewählter Fähigkeit wird eine Aktion ausgeführt
         switch (ability) {
-            case "Double Damage":
-                p.setDoubledamage(true);
+            case "Double damage":
+                p.setDoubledamage(true); // Doppelschaden aktivieren
                 break;
             case "Heal HP":
-                p.damage(-(random.nextInt(5, 30)));
-                setHearts(p, p.getHp()); // Update UI
+                p.damage(-(random.nextInt(5, 30))); // Heile eine zufällige Menge HP
+                setHearts(p, p.getHp()); // Aktualisiere die Lebensanzeige des Spielers
                 break;
-            case "Shield Next Attack":
-                p.setShield(true);
+            case "Shield next attack":
+                p.setShield(true); // Aktiviere den Schutz für den nächsten Angriff
                 break;
         }
 
-        abilityCooldown = 8; // Cooldown for 3 turns
-        panelAbilityCard.setVisible(false);
-        abilityAvailable = false;
+        abilityCooldown = 8; // Setze den Cooldown auf 8 Runden
+        panelAbilityCard.setVisible(false); // Verberge die Fähigkeitskarte
+        abilityAvailable = false; // Deaktiviere die Verfügbarkeit
     }
 
+    // Aktion für den "Hit"-Button
+    @Override
     public void buttonHit_ActionPerformed(ActionEvent evt) {
-        generateAbilityCard();
-        hit(p);
+        generateAbilityCard(); // Generiere eine neue Fähigkeitskarte
+        hit(p); // Spieler führt seinen Zug aus
     }
 
+    // Aktion für den "Stay"-Button
+    @Override
     public void buttonStay_ActionPerformed(ActionEvent evt) {
-        stay(p);
+        stay(p); // Spieler bleibt stehen
     }
 
+    // Beendet das Spiel
     public void exit() {
         System.exit(0);
     }
 
+    // Aktion für den "Restart"-Button
+    @Override
     public void buttonRestart_ActionPerformed(ActionEvent evt) {
         Fight f = new Fight("Game", new Player("Hero", p.isPlayer(), p.getMaxHP(), new DeckV2(1, 10, true)));
-        close();
-        f.battle();
+        close(); // Schließe das aktuelle Spiel
+        f.battle(); // Starte ein neues Spiel
     }
 
+    // Der Spieler zieht eine Karte
     public void hit(Player play) {
 
         if (play.isLockedIn())
-            return; // Don't allow hitting after staying
+            return; // Der Spieler kann nicht mehr ziehen, wenn er sich entschieden hat
 
         Card drawn;
         do {
-            drawn = draw(play.getDeck());
-        } while (drawn.isDrawn());
+            drawn = draw(play.getDeck()); // Ziehe eine Karte aus dem Deck
+        } while (drawn.isDrawn()); // Stelle sicher, dass die Karte noch nicht gezogen wurde
 
-        drawn.setDrawn();
-        setCarddrawn(play, drawn.toStringShort());
+        drawn.setDrawn(true); // Markiere die Karte als gezogen
+        setCarddrawn(play, drawn.toStringShort()); // Zeige die gezogene Karte an
 
-        // Check if the card can be treated as an Ace (special rule)
+        // Überprüfe, ob die Karte als Ass behandelt werden kann (besondere Regel)
         if (drawn.getValue() == play.getDeck().getMinVal() &&
                 play.getPoints() + drawn.getValue() * 11 <= play.getGauge()) {
-            drawn.action(play, 11);
+            drawn.action(play, 11); // Behandle das Ass als 11 Punkte
         } else {
-            drawn.action(play);
+            drawn.action(play); // Behandle die Karte mit ihrem normalen Wert
         }
 
-        setScore(play, String.valueOf(play.getPoints()));
+        setScore(play, String.valueOf(play.getPoints())); // Zeige den aktuellen Punktestand an
 
-        // Handle Overshot (Bust) Condition
+        // Überprüfe, ob der Spieler "überzogen" hat (Bust)
         if (play.getPoints() > play.getGauge()) {
-            play.setOvershot(true);
-            overShot(play);
-            stay(play);
+            play.setOvershot(true); // Setze den "überzogen"-Status
+            overShot(play); // Verarbeite den "überzogen"-Fall
+            stay(play); // Der Spieler bleibt stehen
         }
-        // Handle Perfect Hand (Instant Lock-In)
+        // Überprüfe, ob der Spieler eine perfekte Hand hat
         else if (play.getPoints() == play.getGauge()) {
-            setFinal(play);
+            setFinal(play); // Setze die Hand als final
             if (!play.isPlayer()) {
                 p.setFinalset(true);
+                setFinal(p); // Setze auch die Hand des Spielers als final
             }
-            damageDeal();
+            damageDeal(); // Berechne den Schaden
         }
 
-        // Enemy takes its turn after the player hits
+        // Der Gegner macht seinen Zug nach dem Spieler
         if (play.isPlayer() && !enemy.isLockedIn()) {
-            enemyTurn();
-            turn++;
+            enemyTurn(); // Der Gegner führt seinen Zug aus
+            turn++; // Erhöhe die Runde
         } else if (!play.isPlayer() && !enemy.isLockedIn() && p.isLockedIn()) {
-            enemyTurn();
-            turn++;
+            enemyTurn(); // Der Gegner führt seinen Zug aus
+            turn++; // Erhöhe die Runde
         }
 
-        setRound(turn);
-
-        // Card drawn;
-
-        // if (!play.isLockedIn()) {
-        // do {
-        // drawn = draw(play.getDeck());
-        // } while (drawn.isDrawn());
-        // drawn.setDrawn();
-        // setCarddrawn(play, drawn.toStringShort());
-        // if (drawn.getValue() == play.getDeck().getMinVal()
-        // && play.getPoints() + (drawn.getValue() * 11) <= play.getGauge()) {
-        // drawn.action(play, 11);
-        // } else {
-        // drawn.action(play);
-        // }
-        // setScore(play, String.valueOf(play.getPoints()));
-
-        // }
-
-        // if (play.getPoints() > play.getGauge()) {
-        // overShot(play);
-        // play.setOvershot(true);
-        // damageDeal();
-        // // stay(play);
-        // // do {
-        // // enemyTurn();
-        // // setRound(turn);
-        // // } while (!enemy.isFinalset() && !enemy.isOvershot());
-        // } else if (play.getPoints() == play.getGauge()) {
-        // setFinal(play);
-        // damageDeal();
-        // }
-
-        // if (play.isPlayer || (!enemy.isLockedIn() && p.isFinalset())) {
-        // enemyTurn();
-        // turn = turn + 1;
-        // }
-
-        // setRound(turn);
+        setRound(turn); // Setze die aktuelle Runde
     }
 
+    // Der Spieler bleibt stehen
     public void stay(Player play) {
 
         if (!play.isLockedIn()) {
-            setFinal(play);
-            play.setFinalset(true);
+            setFinal(play); // Setze die Hand als final
+            play.setFinalset(true); // Setze den Status des Spielers als final
         }
 
-        // If the player stays, the enemy should act
+        // Wenn der Spieler bleibt, sollte der Gegner seinen Zug machen
         if (play.isPlayer() && !enemy.isLockedIn()) {
-            enemyTurn();
+            enemyTurn(); // Der Gegner führt seinen Zug aus
         }
 
-        // If both have locked in, process damage calculation
+        // Wenn beide Spieler ihre Züge abgeschlossen haben, berechne den Schaden
         if (p.isLockedIn() && enemy.isLockedIn() && play.isPlayer()) {
             damageDeal();
         }
 
-        // if (!play.isOvershot()) {
-        // setFinal(play);
-        // play.setFinalset(true);
-        // }
-        // if (play.isPlayer) {
-        // // do {
-        // if (!enemy.isLockedIn()) {
-        // enemyTurn();
-        // setRound(turn);
-        // }
-
-        // // } while (!enemy.isFinalset() && !enemy.isOvershot());
-        // }
-
-        // if (p.isLockedIn() && enemy.isLockedIn() && play.isPlayer()) {
-        // damageDeal();
-        // }
     }
 
+    // Der Gegner führt seinen Zug aus
     public void enemyTurn() {
-        // if (enemy.getPoints() < (enemy.getGauge() - (2 *
-        // enemy.getDeck().getMinVal()))) {
-        // hit(enemy);
-        // } else {
-        // stay(enemy);
-        // }
 
         double enemyScoreP = (double) enemy.getPoints() / enemy.getGauge();
 
         if (enemyScoreP < 0.75) {
-            // If below 75% of max gauge, enemy takes more risks
+            // Wenn der Gegner weniger als 75% seines maximalen Werts hat, wird er
+            // risikofreudiger
             hit(enemy);
         } else if (enemyScoreP >= 0.75 && enemyScoreP < 0.90) {
-            // If between 75%-90%, enemy has a chance to stay
-            if (random.nextBoolean()) { // 50% chance to hit
+            // Wenn der Gegner zwischen 75%-90% seines maximalen Werts hat, hat er eine
+            // Chance zu bleiben
+            if (random.nextBoolean()) {
                 hit(enemy);
             } else {
                 stay(enemy);
             }
         } else {
-            // If at 90% or more, enemy always stays
+            // Wenn der Gegner 90% oder mehr hat, bleibt er immer stehen
             stay(enemy);
         }
     }
 
+    // Berechnet den Schaden basierend auf den Handwerten
     public void damageDeal() {
 
         if (damageDealt)
-            return; // Prevent multiple calls per round
+            return; // Verhindere doppelte Berechnungen
         damageDealt = true;
 
-        // Calculate percentage of each player's hand relative to their max gauge
+        // Berechne den prozentualen Anteil der Hand des Spielers und des Gegners
         double playerScoreP = (double) p.getPoints() / p.getGauge();
         double enemyScoreP = (double) enemy.getPoints() / enemy.getGauge();
 
-        // Handle overshot cases first
+        // Überprüfe zuerst, ob einer der Spieler "überzogen" hat
         if (p.isOvershot()) {
-            int damage = enemy.getPoints(); // Enemy wins by default, deals damage
+            int damage = enemy.getPoints(); // Der Gegner gewinnt und fügt Schaden zu
             p.damage(damage);
-            System.out.println("Player busted! Took " + damage + " damage.");
             checkHp();
             return;
         } else if (enemy.isOvershot()) {
-            int damage = p.getPoints(); // Player wins by default, deals damage
+            int damage = p.getPoints(); // Der Spieler gewinnt und fügt Schaden zu
             if (p.getDoubledamage()) {
-                damage *= 2;
+                damage *= 2; // Verdopple den Schaden bei Doppelschaden
                 p.setDoubledamage(false);
             }
             enemy.damage(damage);
-            System.out.println("Enemy busted! Took " + damage + " damage.");
             checkHp();
             return;
         }
 
-        // Calculate damage based on percentage difference
+        // Berechne den Schaden basierend auf dem Unterschied in den Handwerten
         double scoreDiff = Math.abs(playerScoreP - enemyScoreP) * 2;
         if (scoreDiff < 0) {
             scoreDiff = scoreDiff * -2;
         }
-        int baseDamage = (int) (scoreDiff * 10) + 3; // Convert percentage to damage
+        int baseDamage = (int) (scoreDiff * 10) + 3; // Konvertiere den Unterschied in Schaden
         if (p.getDoubledamage()) {
             baseDamage *= 2;
-            p.setDoubledamage(false);
+            p.setDoubledamage(false); // Setze Doppelschaden zurück
         }
 
-        // Apply a bonus multiplier for near-perfect hands
+        // Multipliziere den Schaden bei nahezu perfekten Händen
         if (scoreDiff > 0.9)
             baseDamage *= 4;
 
-        // Determine who takes damage
+        // Bestimme, wer den Schaden nimmt
         if (enemyScoreP >= playerScoreP) {
             p.damage(baseDamage);
-            System.out.println("Enemy wins the round! Player takes " + baseDamage + " damage.");
         } else {
             enemy.damage(baseDamage);
-            System.out.println("Player wins the round! Enemy takes " + baseDamage + " damage.");
         }
 
         checkHp();
     }
 
+    // Überprüft die Lebenspunkte beider Spieler
     public void checkHp() {
         if (p.getHp() > 0) {
-            roundEnd();
+            roundEnd(); // Ende der Runde, wenn der Spieler noch lebt
         } else {
-            gameOver(true, enemysslain);
+            gameOver(true, enemysslain); // Spiel vorbei, wenn der Spieler gestorben ist
         }
     }
-    // double playerScoreP = (double) p.getPoints() / p.getGauge();
-    // System.out.println(playerScoreP);
-    // double enemyScoreP = (double) enemy.getPoints() / enemy.getGauge();
-    // System.out.println(enemyScoreP);
 
-    // if (this.p.isOvershot()) {
-    // int a = this.enemy.getPoints() * 2;
-    // this.p.damage(a);
-
-    // } else if (this.enemy.isOvershot()) {
-    // int a = this.p.getPoints() * 2;
-    // this.enemy.damage(a);
-
-    // } else if (enemyScoreP > playerScoreP || enemyScoreP == playerScoreP) {
-    // int a = this.enemy.getPoints() - this.p.getPoints();
-    // if (a < 2) {
-    // a = 2;
-    // }
-    // if (enemyScoreP == 1) {
-    // a = a * 2;
-    // }
-    // this.p.damage(a * 2);
-    // } else if (enemyScoreP < playerScoreP) {
-    // int a = this.p.getPoints() - this.enemy.getPoints();
-    // if (a < 2) {
-    // a = 2;
-    // }
-    // if (playerScoreP == 1) {
-    // a = a * 2;
-    // }
-    // this.enemy.damage(a);
-    // }
-
-    // if (this.p.getHp() > 0) {
-    // roundEnd();
-    // }
-    // }
-
-    // @Override
+    // Setzt den Zustand der Runde zurück und startet den Kampf neu
+    @Override
     public void buttonContinue_ActionPerformed(ActionEvent evt) {
         roundReset();
         p.setPoints(0);
         enemy.setPoints(0);
-        battle();
+        battle(); // Starte den Kampf neu
     }
-
 }

@@ -1,18 +1,8 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.event.*;
 
 import java.util.Random;
-import java.util.random.*;
-
-/**
- *
- * description
- *
- * @version 1.0 from 24.03.2025
- * @author
- */
 
 public abstract class Gui1 extends JFrame {
     // Anfang Attribute
@@ -47,11 +37,12 @@ public abstract class Gui1 extends JFrame {
     private ImageIcon enemyIcon2 = new ImageIcon("./lib/enemy2.png");
     private ImageIcon[] enemyIconArray = { enemyIcon1, enemyIcon2 };
 
+    protected JLabel enemyImg = new JLabel();
     protected Panel panelAbilityCard = new Panel();
     protected Label labelAbilityText = new Label();
     protected Button buttonUseAbility = new Button("Use Ability");
     protected boolean abilityAvailable = false;
-    protected int abilityCooldown = 0;
+    protected int abilityCooldown = 8;
 
     Random random = new Random();
     boolean damageDealt;
@@ -126,9 +117,9 @@ public abstract class Gui1 extends JFrame {
 
         panelEnemyPH.setBounds(670, 152, 190, 270);
         panelEnemyPH.setBackground(new Color(167, 138, 127));
-        JLabel temp3 = new JLabel(enemyIconArray[random.nextInt(0, (enemyIconArray.length))]);
-        temp3.setSize(190, 270);
-        panelEnemyPH.add(temp3);
+        enemyImg = new JLabel(enemyIconArray[random.nextInt(0, (enemyIconArray.length))]);
+        enemyImg.setSize(190, 270);
+        panelEnemyPH.add(enemyImg);
         cp.add(panelEnemyPH);
 
         labelGauge.setBounds(25, 420, 190, 20);
@@ -251,34 +242,23 @@ public abstract class Gui1 extends JFrame {
 
     }
 
+    // wird noch überschrieben
     public void useAbility() {
-
     }
 
-    // public void specialCardGen() {
-    // Panel panelSCback = new Panel();
-    // Panel panelSCfront = new Panel();
-    // Label labelSCexplain = new Label();
-    // Button buttonSCuse = new Button();
-
-    // panelSCback.setBounds(50, 720, 40, 80);
-    // panelSCback.setBackground(Color.BLACK);
-
-    // panelSCfront.setBounds(55, 725, 30, 70);
-    // panelSCfront.setBackground(Color.WHITE);
-    // cp.add(panelSCback);
-    // }
-
+    // Ändert das Bild vom Gegner
     public void newEnemyImage() {
-        JLabel temp3 = new JLabel(enemyIconArray[random.nextInt(0, (enemyIconArray.length))]);
-        temp3.setSize(190, 270);
-        panelEnemyPH.add(temp3);
+        enemyImg.setIcon(enemyIconArray[random.nextInt(enemyIconArray.length)]);
+        enemyImg.setSize(190, 270);
+        panelEnemyPH.add(enemyImg);
     }
 
+    // Schließt das Fenster
     public void close() {
         super.hide();
     }
 
+    // Setzt die Punkte von Class Player im Gui fest
     public void setScore(Player play, String s) {
         if (play.isPlayer) {
             labelScore.setText("Score: " + s);
@@ -287,6 +267,7 @@ public abstract class Gui1 extends JFrame {
         }
     }
 
+    // Setzt den Blackjack/gauge von Class Player im Gui fest
     public void setGauge(Player play, String s) {
         if (play.isPlayer) {
             labelGauge.setText("Gauge: " + s);
@@ -296,17 +277,12 @@ public abstract class Gui1 extends JFrame {
 
     }
 
+    // Lässt den Continue-Knopf erscheinen
     public void roundEnd() {
         buttonContinue.setVisible(true);
     }
 
-    public void gameOver(boolean b) {
-        panelGameOver.setVisible(b);
-        labelEnemySlain.setVisible(b);
-        labelGameOver.setVisible(b);
-        buttonRestart.setVisible(b);
-    }
-
+    // Gameover-screen anzeigen
     public void gameOver(boolean b, int a) {
         panelGameOver.setVisible(b);
         labelEnemySlain.setText("Enemys slain: " + a);
@@ -315,6 +291,7 @@ public abstract class Gui1 extends JFrame {
         buttonRestart.setVisible(b);
     }
 
+    // zeigt letzte gezogene Karte an
     public void setCarddrawn(Player play, String s) {
         if (play.isPlayer) {
             labelCarddrawn.setText("Card drawn: " + s);
@@ -324,35 +301,25 @@ public abstract class Gui1 extends JFrame {
 
     }
 
+    // Zeigt die Leben im Gui an
     public void setHearts(Player play, double b) {
         if (play.isPlayer) {
             labelHPplayer.setText("HP: " + (int) b);
             double a = 100 - b;
             double x = panelPlayerHp.getX() - (a / play.getMaxHP()) * 90 + panelPlayerHp.getWidth();
             int w = panelPlayerHpBox.getWidth();
-            panelPlayerHpBox.setBounds((int) x, 120, (int) (w + a), 40);
+            panelPlayerHpBox.setBounds((int) x, 120, (int) (w + a), 40); // Schiebt eine Box mit Hintergrundfarbe über
+                                                                         // die Herzen
         } else {
             labelHPenemy.setText("HP: " + (int) b);
             double w = panelEnemyHp.getWidth() * (b / play.getMaxHP());
             w = 90 - w;
-            panelEnemyHpBox.setBounds(panelEnemyHpBox.getX(), 120, (int) w, 40);
+            panelEnemyHpBox.setBounds(panelEnemyHpBox.getX(), 120, (int) w, 40); // Schiebt eine Box mit
+                                                                                 // Hintergrundfarbe über die Herzen
         }
     }
 
-    // public void setHeartsplayer(double b) {
-    // double a = 100 - b;
-    // double x = panelPlayerHp.getX() - (a / 100) * 90 + panelPlayerHp.getWidth();
-    // int w = panelPlayerHpBox.getWidth();
-    // panelPlayerHpBox.setBounds((int) x, 120, (int) (w + a), 40);
-    // }
-
-    // public void setHeartsenemy(double b) {
-    // double w = panelEnemyHp.getWidth() * (b / 100);
-    // w = 90 - w;
-    // panelEnemyHpBox.setBounds(panelEnemyHpBox.getX(), 120, (int) w, 40);
-    // }
-
-    // Anfang Methoden
+    // Buttons werden in Fight überschrieben
     public void buttonHit_ActionPerformed(ActionEvent evt) {
     }
 
@@ -363,9 +330,9 @@ public abstract class Gui1 extends JFrame {
     }
 
     public void buttonRestart_ActionPerformed(ActionEvent evt) {
-
     }
 
+    // Guireaktion wenn Player.getOvershot()
     public void overShot(Player play) {
         if (play.isPlayer) {
             labelState.setText("OVERSHOT");
@@ -377,6 +344,7 @@ public abstract class Gui1 extends JFrame {
 
     }
 
+    // Knöpfe sperren
     public void lockIn() {
         labelState.setVisible(true);
         buttonHit.setEnabled(false);
@@ -384,6 +352,7 @@ public abstract class Gui1 extends JFrame {
         buttonUseAbility.setEnabled(false);
     }
 
+    // Guireaktion wenn Player.getFinalset()
     public void setFinal(Player play) {
         if (play.isPlayer) {
             labelState.setText("FINAL");
@@ -395,6 +364,7 @@ public abstract class Gui1 extends JFrame {
 
     }
 
+    // Knöpfe wieder entsperren, ...
     public void roundReset() {
         labelRound.setText("Round 1");
         labelState.setVisible(false);
@@ -405,6 +375,7 @@ public abstract class Gui1 extends JFrame {
         buttonUseAbility.setEnabled(true);
     }
 
+    // Rounde Text ändern
     public void setRound(int r) {
         labelRound.setText("Round " + r);
     }

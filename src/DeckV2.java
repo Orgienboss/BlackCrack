@@ -1,133 +1,120 @@
 public class DeckV2 {
-    Card[] deck;
-    int decksize;
-    int minValue;
-    int maxValue;
-    boolean images;
-    int index = 0;
 
+    private Card[] deck;
+    private int decksize;
+    private int minValue;
+    private int maxValue;
+    private int index = 0;
+
+    /**
+     * Konstruktor zum Erstellen eines Decks mit bestimmten Kartenwerten und
+     * Bildern.
+     * 
+     * @param minValue Der minimale Kartenwert.
+     * @param maxValue Der maximale Kartenwert.
+     * @param images   Bestimmt, ob Bildkarten hinzugefügt werden sollen.
+     */
     public DeckV2(int minValue, int maxValue, boolean images) {
         this.minValue = minValue;
         this.maxValue = maxValue;
-        this.decksize = (maxValue - minValue + 1) * 4;
-        if (images) {
-            this.decksize = decksize + 3 * 4;
-        }
-        this.images = images;
+        this.decksize = (maxValue - minValue + 1) * 4 + (images ? 12 : 0);
     }
 
+    // Gibt den aktuellen Index zurück
     public int getIndex() {
-        return this.index;
+        return index;
     }
 
+    // Fügt dem aktuellen Index einen Wert hinzu
     public void addIndex(int a) {
-        this.index += a;
+        index += a;
     }
 
+    // Setzt den Index auf einen bestimmten Wert
     public void setIndex(int a) {
-        this.index = a;
+        index = a;
     }
 
+    // Gibt das Kartendeck zurück
     public Card[] getCardDeck() {
         return deck;
     }
 
+    // Gibt die Deckgröße zurück
     public int getSize() {
-        return this.decksize;
+        return decksize;
     }
 
+    // Gibt eine Karte an einer bestimmten Position im Deck zurück
     public Card getCard(int pos) {
-        return this.deck[pos];
+        return deck[pos];
     }
 
-    public void printDeck() {
-        for (int i = 0; i < deck.length; i++) {
-            deck[i].printCardShort();
-        }
-    }
-
+    // Gibt den minimalen Kartenwert zurück
     public int getMinVal() {
-        return this.minValue;
+        return minValue;
     }
 
+    // Gibt den maximalen Kartenwert zurück
     public int getMaxVal() {
-        return this.maxValue;
+        return maxValue;
     }
 
+    // Berechnet den maximal möglichen Kartenwert im Deck (Summe der Werte aller
+    // Karten)
     public int getMaxPossible() {
-        int a = 0;
-        for (int i = 0; i < deck.length; i++) {
-            a = a + deck[i].getValue();
+        int sum = 0;
+        for (Card c : deck) {
+            sum += c.getValue();
         }
-        return a;
+        return sum;
     }
 
+    /**
+     * Erstellt ein Deck mit Kartenwerten von minValue bis maxValue.
+     * Falls Bilderkarten aktiviert sind, werden zusätzlich König, Dame und Bube
+     * hinzugefügt mit maxValue.
+     */
     public void genDeck() {
-        // System.out.println("Size: " + this.decksize);
-        this.deck = new Card[this.decksize];
-        int val = this.minValue;
-        char rank = 'N';
-        int count = 0;
-        int count2 = 0;
-        String s = null;
+        deck = new Card[decksize];
+        char[] suits = { 'H', 'D', 'S', 'C' }; // Symbole für die Kartenfarben (Hearts, Diamonds, Spades, Cross)
+        int val = minValue, count2 = 0;
 
-        for (int i = 0; i < deck.length; i++) {
-            switch (count) {
-                case 0:
-                    rank = 'H';
-                    count = count + 1;
-                    break;
+        for (int i = 0; i < decksize; i++) {
+            char rank = suits[i % 4]; // Bestimmt den Rang der Karte (suit)
 
-                case 1:
-                    rank = 'D';
-                    count = count + 1;
-                    break;
-
-                case 2:
-                    rank = 'S';
-                    count = count + 1;
-                    break;
-
-                case 3:
-                    rank = 'C';
-                    count = 0;
-                    break;
-
-                default:
-                    break;
-            }
-
-            if (val > this.maxValue) {
-                if (count2 == 0) {
-                    s = "King";
-                } else if (count2 == 4) {
-                    s = "Queen";
-                } else if (count2 == 4 * 2) {
-                    s = "Jack";
-                }
-                this.deck[i] = new Card(s, maxValue, rank);
-                count2 = count2 + 1;
+            if (val > maxValue) {
+                // Wenn der Wert über maxValue hinausgeht, werden Bildkarten erstellt
+                // (König,Dame, Bube)
+                String[] faces = { "King", "Queen", "Jack" };
+                deck[i] = new Card(faces[count2 / 4], maxValue, rank);
+                count2++;
             } else {
-                this.deck[i] = new Card(String.valueOf(val), val, rank);
+                // Erstellt eine normale Karte mit Wert und Farbe
+                deck[i] = new Card(String.valueOf(val), val, rank);
             }
 
-            if (count == 0) {
-                val = val + 1;
-            }
-
+            // Nachdem jede Karte einer Farbe zugeordnet wurde, wird der Wert erhöht
+            if (i % 4 == 3)
+                val++;
         }
     }
 
-    // Durchmischung des Decks bzw Arrays (ggf. mehrmals)
+    /**
+     * Mischt das Deck durch Tausch zufälliger Kartenplätze.
+     * 
+     * @param factor = Anzahl der Mischdurchläufe
+     */
     public void shuffleDeck(int factor) {
         for (int j = 0; j < factor; j++) {
             for (int i = 0; i < deck.length; i++) {
-                int m = (int) (Math.random() * (this.deck.length));
-                Card temp = this.deck[m];
-                this.deck[m] = this.deck[i];
-                this.deck[i] = temp;
+                // Zufällige Position im Deck auswählen
+                int m = (int) (Math.random() * deck.length);
+                // Karten tauschen
+                Card temp = deck[m];
+                deck[m] = deck[i];
+                deck[i] = temp;
             }
         }
     }
-
 }
